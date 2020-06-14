@@ -23,7 +23,8 @@ struct Options {
   string taxonomy_filename;
   string options_filename;
   string output_filename;
-  bool use_mpa_style;
+  string mpa_filename;
+
   bool report_zeros;
   bool skip_counts;
   unsigned int num_threads;
@@ -43,7 +44,6 @@ int main(int argc, char **argv) {
   Options opts;
   opts.report_zeros = false;
   opts.output_filename = "/dev/fd/1";
-  opts.use_mpa_style = false;
   opts.skip_counts = false;
   opts.num_threads = 1;
   ParseCommandLine(argc, argv, opts);
@@ -79,10 +79,10 @@ int main(int argc, char **argv) {
     for (auto &kv_pair : taxid_counts) {
       total_seqs += kv_pair.second;
     }
-    if (opts.use_mpa_style)
+    if (opts.mpa_filename.empty())
       ReportMpaStyle(opts.output_filename, opts.report_zeros, taxonomy, taxid_counts);
-    else
-      ReportKrakenStyle(opts.output_filename, opts.report_zeros, taxonomy,
+    
+    ReportKrakenStyle(opts.output_filename, opts.report_zeros, taxonomy,
           taxid_counts, total_seqs, 0);
   }
 
@@ -113,7 +113,7 @@ void ParseCommandLine(int argc, char **argv, Options &opts) {
         opts.output_filename = optarg;
         break;
       case 'm' :
-        opts.use_mpa_style = true;
+        opts.mpa_filename = optarg;
         break;
       case 's' :
         opts.skip_counts = true;
@@ -140,7 +140,7 @@ void usage(int exit_code) {
        << "* -t FILENAME   Kraken 2 taxonomy filename\n"
        << "* -o FILENAME   Kraken 2 database options filename\n"
        << "  -O FILENAME   Output filename (def: /dev/fd/1)\n"
-       << "  -m            Use MPA style output instead of Kraken 2 output\n"
+       << "  -m FILENAME   Use MPA style output instead of Kraken 2 output\n"
        << "  -s            Skip reporting minimizer counts, just show DB stats\n"
        << "  -z            Report taxa with zero counts\n";
   exit(exit_code);
